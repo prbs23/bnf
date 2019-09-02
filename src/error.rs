@@ -28,8 +28,8 @@ impl error::Error for Error {
     }
 }
 
-impl<'a> From<Err<(&'a [u8],ErrorKind)>> for Error {
-    fn from(err: Err<(&[u8],ErrorKind)>) -> Self {
+impl<'a> From<Err<(&'a str,ErrorKind)>> for Error {
+    fn from(err: Err<(&str,ErrorKind)>) -> Self {
         match err {
             Err::Incomplete(n) => Error::from(n),
             Err::Error(e) => Error::from(e),
@@ -38,9 +38,9 @@ impl<'a> From<Err<(&'a [u8],ErrorKind)>> for Error {
     }
 }
 
-impl<'a> From<(&'a [u8],ErrorKind)> for Error {
-    fn from(err: (&[u8],ErrorKind)) -> Self {
-        let string = format!("Parsing error: {}\n {:?}", err.1.description(), str::from_utf8(err.0));
+impl<'a> From<(&'a str,ErrorKind)> for Error {
+    fn from(err: (&str,ErrorKind)) -> Self {
+        let string = format!("Parsing error: {}\n {:?}", err.1.description(), err.0);
         Error::ParseError(string)
     }
 }
@@ -62,13 +62,13 @@ mod tests {
     use nom::Err;
 
     named!(
-        give_error_kind,
+        give_error_kind<&str, &str>,
         do_parse!(tag!("1234") >> res: tag!("5678") >> (res))
     );
 
     #[test]
     fn gets_error_error() {
-        let nom_result = give_error_kind("12340".as_bytes());
+        let nom_result = give_error_kind("12340");
         let nom_error;
         match nom_result {
             Result::Err(e) => match e {
@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn gets_error_incomplete() {
-        let nom_result = give_error_kind("".as_bytes());
+        let nom_result = give_error_kind("");
         let nom_error;
         match nom_result {
             Result::Err(e) => match e {
