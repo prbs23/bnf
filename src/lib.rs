@@ -171,6 +171,7 @@ mod error;
 mod expression;
 mod grammar;
 mod parsers;
+mod ebnf_w3c_parsers;
 mod production;
 mod term;
 pub use error::Error;
