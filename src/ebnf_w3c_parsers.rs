@@ -150,11 +150,13 @@ mod tests {
     #[test]
     fn char_match() {
         assert_eq!(character("abcd"), Ok(("bcd", ('a', 'a'))));
+        assert_eq!(character("\u{2211}abcd"), Ok(("abcd", ('\u{2211}', '\u{2211}'))));
     }
 
     #[test]
     fn char_range_match() {
         assert_eq!(char_range("a-zd"), Ok(("d", ('a', 'z'))));
+        assert_eq!(char_range("\u{0}-\u{2211}"), Ok(("", ('\0', '\u{2211}'))));
         assert_eq!(char_range("a--"), Err(Err::Error(("-", ErrorKind::NoneOf))));
     }
 
@@ -179,6 +181,7 @@ mod tests {
     fn char_class_match() {
         assert_eq!(char_class("[^abcd]"), Ok(("", (true, vec![('a', 'a'), ('b','b'), ('c', 'c'), ('d', 'd')]))));
         assert_eq!(char_class("[a-zA-Z]"), Ok(("", (false, vec![('a', 'z'), ('A', 'Z')]))));
+        assert_eq!(char_class("[\u{0391}-Ϋ]"), Ok(("", (false, vec![('Α', 'Ϋ')]))));
         assert_eq!(char_class("[^#x0061-#x007a#x41-#x5A]"), Ok(("", (true, vec![('a', 'z'), ('A', 'Z')]))));
         assert_eq!(char_class("[a-z#x41-#x5A]"), Ok(("", (false, vec![('a', 'z'), ('A', 'Z')]))));
         assert_eq!(char_class("[^a-z#x41-#x5A#x0xyz]"), Ok(("", (true, vec![('a', 'z'), ('A', 'Z'), ('\0', '\0'), ('x', 'x'), ('y', 'y'), ('z', 'z')]))));
@@ -186,7 +189,7 @@ mod tests {
 
     #[test]
     fn string_literal_match() {
-        assert_eq!(string_literal("'Hello World'"), Ok(("", String::from("Hello World"))));
+        assert_eq!(string_literal("'Hello WorldΘ'"), Ok(("", String::from("Hello WorldΘ"))));
         assert_eq!(string_literal("\"Hello World\""), Ok(("", String::from("Hello World"))));
         assert_eq!(string_literal("\"'Hello World\"'"), Ok(("'", String::from("'Hello World"))));
         assert_eq!(string_literal(" \"Hello World\""), Err(Err::Error((" \"Hello World\"", ErrorKind::Tag))));
