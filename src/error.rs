@@ -40,11 +40,7 @@ impl<'a> From<Err<(&'a str, ErrorKind)>> for Error {
 
 impl<'a> From<(&'a str, ErrorKind)> for Error {
     fn from(err: (&str, ErrorKind)) -> Self {
-        let string = format!(
-            "Parsing error: {}\n {:?}",
-            err.1.description(),
-            err.0
-        );
+        let string = format!("Parsing error: {}\n {:?}", err.1.description(), err.0);
         Error::ParseError(string)
     }
 }
